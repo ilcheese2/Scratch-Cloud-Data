@@ -8,22 +8,27 @@ from selenium.webdriver.common.keys import Keys
 import os
 
 items = 2000
-url = f"https://clouddata.scratch.mit.edu/logs?projectid=12785898&limit={items}&offset=0"
+url = f"https://clouddata.scratch.mit.edu/logs?projectid=498215146&limit={items}&offset=0"
 
 filename = "data.json"
 
-chars = [" ", "!", '"', "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", "0", "1", "2", "3", "4", "5", "6", "7", "8, 9", ":", ";", "<", "=", ">", "?", "@", "a", "b", "c", "d",
-         "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "[", "\\", "]", "^", "_", "`", 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', "{", "|", "}", "~"]
+chars ='abcdefghijklmnopqrstuvwxyz 1234567890!@#$%^&*()-=_+{}[]|\:";' + "'?,./"
 
-driver = webdriver.Chrome(os.path.dirname(os.path.realpath(__file__)) + "/chromedriver")
+#driver = webdriver.Chrome(os.path.dirname(os.path.realpath(__file__)) + "/chromedriver")
 
 def decode(input):
     output = ""
     i = 0
     for l in range(1, int(round((len(input)/2)+1))):
-        output = output + chars[int(input[i:i+2])]
+        if(int(input[i] + input[i+1]) == 99):
+            output = output + "\n"
+            i += 2
+            continue
+        print(int(input[i] + input[i+1]))
+        output = output + chars[int(input[i] + input[i+1]) - 1]
         i += 2
     return output
+
 
 def add_data():
     new_data = requests.get(url).json()
@@ -41,7 +46,7 @@ def add_data():
         else:
             data.append(s)
         del s["verb"]
-        #s["value"] = decode(s["value"]) Decode doesn't work
+        s["value"] = decode(s["value"])
 
     if(len(data) >= 600):
         data = data[200:]
@@ -55,7 +60,7 @@ def answer(answer):
     answerbox.send_keys(Keys.RETURN)
 
 def start():
-    driver.get("https://scratch.mit.edu/projects/497913499/")
+    driver.get("https://scratch.mit.edu/projects/498215146/")
     while True:
         time.sleep(0.01)
         try:
@@ -67,8 +72,7 @@ def start():
             go.click()
             break
 
-start()
 while True:
     time.sleep(1)
     add_data()
-    answer("Chocolate Potato Man")
+    #answer("Chocolate Potato Man")
